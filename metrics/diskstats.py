@@ -37,20 +37,21 @@ class Diskstats(object):
 
     def state(self):
         state = self.measure()
-        if self.old_devices is not None:
-            delta_state = state.copy()
-            for device, stats in state.iteritems():
-                for service, metric in stats.iteritems():
-                    delta = metric - self.old_devices[device][service]
+        if self.old_devices is None:
+            self.old_devices = state
+            return {}
 
-                    if 'io reqs' in service:
-                        continue
-                    if 'io time' in service:
-                        delta_state[device][service] = float(delta) / (self.interval * 1000)
-                        continue
-                    delta_state[device][service] = float(delta) / self.interval
+        delta_state = state.copy()
+        for device, stats in state.iteritems():
+            for service, metric in stats.iteritems():
+                delta = metric - self.old_devices[device][service]
 
-            return delta_state
+                if 'io reqs' in service:
+                    continue
+                if 'io time' in service:
+                    delta_state[device][service] = float(delta) / (self.interval * 1000)
+                    continue
+                delta_state[device][service] = float(delta) / self.interval
 
         self.old_devices = state
-        return state
+        return delta_state

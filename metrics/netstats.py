@@ -48,15 +48,16 @@ class Netstats(object):
 
     def state(self):
         state = self.measure()
-        if self.old_interfaces is not None:
-            delta_state = state.copy()
-            for interface, stats in state.iteritems():
-                for service, metric in stats.iteritems():
-                    delta = metric - self.old_interfaces[interface][service]
+        if self.old_interfaces is None:
+            self.old_interfaces = state
+            return {}
 
-                    delta_state[interface][service] = float(delta) / self.interval
+        delta_state = state.copy()
+        for interface, stats in state.iteritems():
+            for service, metric in stats.iteritems():
+                delta = metric - self.old_interfaces[interface][service]
 
-            return delta_state
+                delta_state[interface][service] = float(delta) / self.interval
 
         self.old_interfaces = state
-        return state
+        return delta_state
