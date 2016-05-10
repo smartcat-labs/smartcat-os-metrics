@@ -1,3 +1,6 @@
+import copy
+
+
 class Netstats(object):
     file_path = '/proc/net/dev'
 
@@ -48,16 +51,18 @@ class Netstats(object):
 
     def state(self):
         state = self.measure()
+
         if self.old_interfaces is None:
             self.old_interfaces = state
             return {}
 
-        delta_state = state.copy()
+        delta_state = copy.deepcopy(state)
         for interface, stats in state.iteritems():
             for service, metric in stats.iteritems():
                 delta = metric - self.old_interfaces[interface][service]
 
                 delta_state[interface][service] = float(delta) / self.interval
 
+        print delta_state
         self.old_interfaces = state
         return delta_state

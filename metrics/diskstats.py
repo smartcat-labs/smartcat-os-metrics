@@ -1,3 +1,6 @@
+import copy
+
+
 class Diskstats(object):
     file_path = '/proc/diskstats'
 
@@ -37,11 +40,12 @@ class Diskstats(object):
 
     def state(self):
         state = self.measure()
+
         if self.old_devices is None:
             self.old_devices = state
             return {}
 
-        delta_state = state.copy()
+        delta_state = copy.deepcopy(state)
         for device, stats in state.iteritems():
             for service, metric in stats.iteritems():
                 delta = metric - self.old_devices[device][service]
