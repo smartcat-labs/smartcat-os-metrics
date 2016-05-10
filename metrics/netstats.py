@@ -63,6 +63,5 @@ class Netstats(object):
 
                 delta_state[interface][service] = float(delta) / self.interval
 
-        print delta_state
         self.old_interfaces = state
         return delta_state
