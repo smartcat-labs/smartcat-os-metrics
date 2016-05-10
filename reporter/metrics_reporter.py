@@ -15,7 +15,7 @@ class MetricsReporter(object):
         self.host = host
         self.port = port
         self.interval = interval
-        self.client = AutoFlushingQueuedClient(UDPTransport(self.host, self.port))
+        self.client = Client(TCPTransport(self.host, self.port))
         self.client.transport.connect()
 
         self.diskstats = Diskstats()
