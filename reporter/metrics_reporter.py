@@ -18,7 +18,7 @@ class MetricsReporter(object):
         self.client = Client(TCPTransport(self.host, self.port))
         self.client.transport.connect()
 
-        self.diskstats = Diskstats()
+        self.diskstats = Diskstats(self.interval)
         self.health = Health()
         self.netstats = Netstats()
 

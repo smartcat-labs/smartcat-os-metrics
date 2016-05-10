@@ -13,7 +13,11 @@ class Diskstats(object):
                     'io time',
                     'io weighted']
 
-    def state(self):
+    def __init__(self, interval):
+        self.old_devices = None
+        self.interval = interval
+
+    def measure(self):
         devices = {}
         with open(self.file_path, 'rb') as f:
             for line in (l for l in f if l != ''):
@@ -28,4 +32,24 @@ class Diskstats(object):
                     continue
 
                 devices[device] = dict((k, int(v)) for k, v in data.iteritems())
+
         return devices
+
+    def state(self):
+        state = self.measure()
+        if self.old_devices is not None:
+            delta_state = state.copy()
+            for device, stats in state.iteritems():
+                for service, metric in stats.iteritems():
+                    delta = metric - self.old_devices[device][service]
+
+                    if 'io reqs' in service:
+                        continue
+                    if 'io time' in service:
+                        delta_state[device][service] = float(delta) / (self.interval * 1000)
+                        continue
+                    delta_state[device][service] = float(delta) / self.interval
+
+            return delta_state
+
+        return state

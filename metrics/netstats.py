@@ -18,6 +18,9 @@ class Netstats(object):
                    'tx carrier',
                    'tx compressed']
 
+    def __init__(self):
+        self.old_interfaces = None
+
     def state(self):
         with open(self.file_path, 'rb') as f:
             header = f.readline()
