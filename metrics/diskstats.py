@@ -52,4 +52,5 @@ class Diskstats(object):
 
             return delta_state
 
+        self.old_devices = state
         return state
