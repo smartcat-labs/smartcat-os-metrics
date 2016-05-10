@@ -18,10 +18,11 @@ class Netstats(object):
                    'tx carrier',
                    'tx compressed']
 
-    def __init__(self):
+    def __init__(self, interval):
         self.old_interfaces = None
+        self.interval = interval
 
-    def state(self):
+    def measure(self):
         with open(self.file_path, 'rb') as f:
             header = f.readline()
             if not header.count('|'):
@@ -44,3 +45,18 @@ class Netstats(object):
                 interfaces[name] = dict((k, int(v)) for k, v in values.iteritems())
 
             return interfaces
+
+    def state(self):
+        state = self.measure()
+        if self.old_interfaces is not None:
+            delta_state = state.copy()
+            for interface, stats in state.iteritems():
+                for service, metric in stats.iteritems():
+                    delta = metric - self.old_interfaces[interface][service]
+
+                    delta_state[interface][service] = float(delta) / self.interval
+
+            return delta_state
+
+        self.old_interfaces = state
+        return state

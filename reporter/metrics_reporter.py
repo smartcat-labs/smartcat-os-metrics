@@ -20,7 +20,7 @@ class MetricsReporter(object):
 
         self.diskstats = Diskstats(self.interval)
         self.health = Health()
-        self.netstats = Netstats()
+        self.netstats = Netstats(self.interval)
 
     def add_event(self, state, service, metric):
         self.client.event(state=state, service=service, metric_f=metric, ttl=10)
