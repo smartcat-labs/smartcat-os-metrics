@@ -4,7 +4,11 @@
 Collects OS metrics and reports measurement to Riemann server.
 
 ### Installation
-At this point no package or installer is provided. Simply clone git repository or download package of master branch, unpack and run with parameters:
+At this point no package or installer is provided. Simply clone git repository or download package of master branch and unpack. Install dependencies using pip
+```
+pip install -r requirements.txt
+```
+and run with parameters
 ```
 python start.py -h $RIEMANN_HOST
 ```
