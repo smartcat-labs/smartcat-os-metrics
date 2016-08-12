@@ -28,8 +28,12 @@ def main(host, port, interval, debug):
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
         log.debug("Debug mode is enabled")
-    sender = reporter.MetricsReporter(host, port, interval)
-    sender.run()
+    try:
+        sender = reporter.MetricsReporter(host, port, interval)
+        sender.run()
+    except KeyboardInterrupt:
+        log.info('Keyboard interrupt caught. Exiting!')
+        sys.exit()
 
 if __name__ == '__main__':
     main()

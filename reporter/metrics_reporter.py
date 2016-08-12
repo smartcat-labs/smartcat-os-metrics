@@ -16,7 +16,6 @@ class MetricsReporter(object):
         self.port = port
         self.interval = interval
         self.client = Client(TCPTransport(self.host, self.port))
-        self.client.transport.connect()
 
         self.diskstats = Diskstats(self.interval)
         self.health = Health()
@@ -27,12 +26,16 @@ class MetricsReporter(object):
 
     def run(self):
         while True:
+            if not self.is_connected():
+                self.try_connect()
+
             try:
                 self.measure()
-                time.sleep(self.interval)
-            except KeyboardInterrupt:
-                log.info('BYE BYE!!!')
-                sys.exit()
+            except (socket.error, struct.error):
+                log.error('Failed to report measurement')
+                self.client.transport.disconnect()
+                self.client = None
+            time.sleep(self.interval)
 
     def measure(self):
         for device, stats in self.diskstats.state().iteritems():
@@ -57,3 +60,24 @@ class MetricsReporter(object):
         memory = self.health.linux_memory()
         self.add_event("ok", "memory", memory)
         log.debug("%s %s" % ("memory", memory))
+
+    def try_connect(self):
+        if self.client is None:
+            self.client = Client(TCPTransport(self.host, self.port))
+
+        while not self.is_connected():
+            log.info('Trying to connect')
+            try:
+                self.client.transport.connect()
+            except socket.error:
+                log.info('Failed to connect. Sleeping 10 seconds')
+                time.sleep(10)
+
+        log.info('Connected to server')
+
+    def is_connected(self):
+        try:
+            self.client.transport.socket.type
+            return True
+        except (AttributeError, RuntimeError, socket.error):
+            return False
